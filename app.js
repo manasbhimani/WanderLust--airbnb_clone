@@ -5,6 +5,8 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate"); // helps in create good templates
 const ExpressError = require("./utils/ExpressError.js");
+const session = require("express-session");
+const flash = require("connect-flash");
 
 const listings = require("./routes/listing.js");
 const reviews = require("./routes/review.js");
@@ -29,15 +31,34 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+const sessionOptions = {
+  secret: "mysupersecreatcode",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    expires: Date.now() + 7 * 14 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  },
+};
+
 app.get("/", (req, res) => {
   res.send("Hii There, I am Root");
 });
 
+app.use(session(sessionOptions));
+app.use(flash());
+
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  next();
+});
 app.use("/listings", listings); //single line instead of whole listing due to router
 
 app.use("/listings/:id/reviews", reviews); //single line instead of whole regview due to router
 
 app.all("/{*splat}", (req, res, next) => {
+  // /{*splat} means * in newer versions of express
   next(new ExpressError(404, "Page Not Found!"));
 });
 
