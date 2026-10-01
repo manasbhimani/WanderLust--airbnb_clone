@@ -11,8 +11,9 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
 
-const listings = require("./routes/listing.js");
-const reviews = require("./routes/review.js");
+const listingsRouter = require("./routes/listing.js");
+const reviewRouter = require("./routes/review.js");
+const userRouter = require("./routes/user.js");
 
 main()
   .then(() => {
@@ -65,19 +66,19 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/demouser", async (req, res) => {
-  let fakeUser = new User({
-    email: "student@gamil.com",
-    username: "delta-student",
-  });
+// app.get("/demouser", async (req, res) => {
+//   let fakeUser = new User({
+//     email: "student@gamil.com",
+//     username: "delta-student",
+//   });
 
-  let registeredUser = await User.register(fakeUser, "helloworld");
-  res.send(registeredUser);
-});
+//   let registeredUser = await User.register(fakeUser, "helloworld");
+//   res.send(registeredUser);
+// });
 
-app.use("/listings", listings); //single line instead of whole listing due to router
-
-app.use("/listings/:id/reviews", reviews); //single line instead of whole regview due to router
+app.use("/listings", listingsRouter); //single line instead of whole listing due to router
+app.use("/listings/:id/reviews", reviewRouter); //single line instead of whole regview due to router
+app.use("/", userRouter);
 
 app.all("/{*splat}", (req, res, next) => {
   // /{*splat} means * in newer versions of express
