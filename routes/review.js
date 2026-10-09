@@ -27,6 +27,7 @@ router.delete(
   "/:reviewId",
   isLoggedIn,
   isReviewAuthor,
+  isReviewAuthor,
   wrapAsync(reviewController.destroyReview),
 );
 
