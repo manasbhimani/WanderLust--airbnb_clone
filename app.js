@@ -14,6 +14,7 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate"); // helps in create good templates
 const ExpressError = require("./utils/ExpressError.js");
 const session = require("express-session");
+const MongoStore = require("connect-mongo").default;
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -45,7 +46,16 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  crypto: {
+    secret: "mysupersecreatcode",
+  },
+  touchAfter: 24 * 3600,
+});
+
 const sessionOptions = {
+  store,
   secret: "mysupersecreatcode",
   resave: false,
   saveUninitialized: true,
@@ -55,6 +65,10 @@ const sessionOptions = {
     httpOnly: true,
   },
 };
+
+store.on("error", (err) => {
+  console.log("ERROR in MONGO SESSION STORE",err);
+});
 
 app.use(session(sessionOptions));
 app.use(flash());
